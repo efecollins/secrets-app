@@ -1,15 +1,16 @@
 //jshint esversion:6
 require('dotenv').config();
-const express= require('express');
+const express = require('express');
 const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
-const md5 = require('md5');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 const app = express();
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/userDB');
 
@@ -29,14 +30,16 @@ app.get('/login', (req, res) => {
 })
 
 app.post('/login', (req, res) => {
-    Users.findOne({email: req.body.username}, (err, foundUser) => {
-        if(err) {
+    Users.findOne({ email: req.body.username }, (err, foundUser) => {
+        if (err) {
             console.log(err);
         } else {
-            if(foundUser) {
-                if(foundUser.password === md5(req.body.password)) {
-                    res.render('secrets');
-                }
+            if (foundUser) {
+                bcrypt.compare(req.body.password, foundUser.password, function (err, result) {
+                    if (result === true) {
+                        res.render('secrets');
+                    }
+                });
             }
         }
     })
@@ -47,18 +50,20 @@ app.get('/register', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
-    const newUser = new Users({
-        email: req.body.username,
-        password: md5(req.body.password)
-    })
+    bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
+        const newUser = new Users({
+            email: req.body.username,
+            password: hash
+        })
 
-    newUser.save(err => {
-        if(err) {
-            console.log(err);
-        } else {
-            res.render('secrets');
-        }
-    })
+        newUser.save(err => {
+            if (err) {
+                console.log(err);
+            } else {
+                res.render('secrets');
+            }
+        })
+    });
 })
 
 app.listen(3000, () => {

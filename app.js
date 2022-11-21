@@ -18,7 +18,7 @@ app.use(session({ secret: 'Our little secret.', resave: false, saveUninitialized
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect('mongodb://localhost:27017/userDB');
+mongoose.connect(process.env.MONGODB_URI);
 
 const userSchema = new mongoose.Schema({
     email: String,
@@ -48,8 +48,7 @@ passport.deserializeUser(function (user, cb) {
 
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/secrets"
+    clientSecret: process.env.CLIENT_SECRET
 },
     function (accessToken, refreshToken, profile, cb) {
         Users.findOrCreate({ googleId: profile.id }, function (err, user) {

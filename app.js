@@ -49,7 +49,7 @@ passport.deserializeUser(function (user, cb) {
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "http://secret.cyclic.app/auth/google/secrets"
+    callbackURL: "https://secret.cyclic.app/auth/google/secrets"
 },
     function (accessToken, refreshToken, profile, cb) {
         Users.findOrCreate({ googleId: profile.id }, function (err, user) {

@@ -49,7 +49,7 @@ passport.deserializeUser(function (user, cb) {
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "https://secret.cyclic.app/auth/google/secrets"
+    callbackURL: "http://secret.cyclic.app/auth/google/secrets"
 },
     function (accessToken, refreshToken, profile, cb) {
         Users.findOrCreate({ googleId: profile.id }, function (err, user) {
@@ -91,12 +91,12 @@ app.post('/login', (req, res) => {
 })
 
 app.get('/secrets', (req, res) => {
-    Users.find({secret: {$ne: null}}, (err, foundUsers) => {
-        if(err) {
+    Users.find({ secret: { $ne: null } }, (err, foundUsers) => {
+        if (err) {
             console.log(err)
         } else {
-            if(foundUsers) {
-                res.render('secrets', {usersWithSecrets: foundUsers})
+            if (foundUsers) {
+                res.render('secrets', { usersWithSecrets: foundUsers })
             }
         }
     })
@@ -113,10 +113,10 @@ app.get('/submit', (req, res) => {
 app.post('/submit', (req, res) => {
     const submittedSecret = req.body.secret;
     Users.findById(req.user.id, (err, foundUser) => {
-        if(err) {
+        if (err) {
             console.log(err)
         } else {
-            if(foundUser) {
+            if (foundUser) {
                 foundUser.secret.push(submittedSecret)
                 foundUser.save(() => {
                     res.redirect('/secrets')
